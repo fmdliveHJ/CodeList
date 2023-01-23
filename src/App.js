@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getReviews } from "./api";
+import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
 
 const LIMIT = 3;
@@ -9,12 +10,13 @@ function App() {
   //item state의 초기값으로 빈배열을 넣어줌
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  //에러객체나 null값을 가짐
   const [loadingError, setLoadingError] = useState(null);
+
   const [offset, setOffset] = useState(0);
   const sortedItems = items.sort((a, b) => b[order] - a[order]);
 
   //api에서 목록에 더 있는지 아닌지 hasNext로 확인할수 있음
-
   const [hasNext, setHasNext] = useState(false);
   const handleNewestClick = () => setOrder("createdAt");
 
@@ -28,6 +30,7 @@ function App() {
   //setItems에
   const handleLoad = async (option) => {
     let result;
+    //네트워크 리퀘스트전에 true로 만듬
     try {
       setIsLoading(true);
       setLoadingError(null);
@@ -39,16 +42,20 @@ function App() {
       setIsLoading(false);
     }
     const { reviews, paging } = result;
+    //페이지 네이션에서는 데이터를 일부부만 받아와서 items 배열에 요소들을 추가해주어야함
     if (option.offset === 0) {
       setItems(reviews);
     } else {
       //여기서 prev는 고정값이 아니라 현재시점의 state값을 말함
+      //비동기에서 이전 state를 사용하려면 함수에서 콜백을 사용해서 이전state를 사용함
       setItems((prev) => [...prev, ...reviews]);
     }
     setOffset(option.offset + reviews.length);
     setHasNext(paging.hasNext);
   };
 
+  //버튼 클릭시 핸들로드에 지금 offset값 6을 전달
+  // offset값이 6이 아니기 때문에 이전 값들까지 담아서 출력
   const handleMore = () => {
     handleLoad({ order, offset, limit: LIMIT });
   };
@@ -57,17 +64,13 @@ function App() {
     handleLoad({ order, offset: 0, limit: LIMIT });
   }, [order]);
 
-  /**
-   * 비동기 함수 실행후
-   * 리뷰수 변수 setItems에 state를 변경 해서 app컴포넌트를 리랜더링함
-   * 이때 또다시 핸들 함수를 실행 > 무한 루프
-   */
   return (
     <div>
       <div>
         <button onClick={handleNewestClick}>최신순</button>
         <button onClick={handleBestClick}>베스트순</button>
       </div>
+      <ReviewForm />
       <ReviewList items={sortedItems} onDelete={handleDelete} />
       {/* <button onClick={handleLoadClick}>불러오기</button> */}
       {hasNext && (
@@ -81,3 +84,12 @@ function App() {
 }
 
 export default App;
+
+/**
+ * 처음 app콤포넌트 실행하면 useEffect 실행 handleLoad실행
+ * order, offsety , limit 리퀘스트 보냄
+ * offset이 0이니까 리스폰스 받은 데이터로 items state 변경
+ * (if문에 offset에 0이면 이라는 가정을 주어서 설정 )
+ * 데이터를 6개 받아오면 offset state는 0 + 6
+ *
+ */
