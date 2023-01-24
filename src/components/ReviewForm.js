@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { createReview } from "../api";
 import FileInput from "./FileInput";
+import useAsync from "./hooks/useAsync";
 import RatingInput from "./RatingInput";
 import "./ReviewForm.css";
 const INITIAL_VALUES = {
@@ -36,12 +36,9 @@ const ReviewForm = ({
   //   setContent(e.target.value);
   // };
   //이벤트 객체에서 name값을 가져오는 것을 활용
-  const [isSubmit, setIsSubmit] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
-
   const [values, setValues] = useState(initialValues);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittingError, setSubmittingError] = useState(null);
+  const [isSubmitting, submittingError, onSubmitAsync] = useAsync(onSubmit);
+
   //name과 value를 파라미터로 받고 set함수를 호출함
   const handleChange = (name, value) => {
     setValues((prev) => ({
@@ -63,17 +60,8 @@ const ReviewForm = ({
     formData.append("rating", values.rating);
     formData.append("content", values.content);
     formData.append("imgFile", values.imgFile);
-    let result;
-    try {
-      setSubmittingError(null);
-      setIsSubmitting(true);
-      result = await onSubmit(formData);
-    } catch (error) {
-      setSubmittingError(error);
-      return;
-    } finally {
-      setIsSubmitting(false);
-    }
+    let result = await onSubmitAsync(formData);
+    if (!result) return;
     const { review } = result;
     setValues(INITIAL_VALUES);
     onSubmitSuccess(review);
@@ -107,11 +95,11 @@ const ReviewForm = ({
         value={values.content}
         onChange={handleInputChange}
       ></textarea>
-      <button type="submit" disabled={isSubmit}>
+      <button type="submit" disabled={isSubmitting}>
         확인{" "}
       </button>
       {onCancel && <button onClick={onCancel}>취소</button>}
-      {submitError?.message && <div>{submitError.message}</div>}
+      {submittingError?.message && <div>{submittingError.message}</div>}
     </form>
   );
 };

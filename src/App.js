@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getReviews, createReview, updateReview, deleteReview } from "./api";
+import useAsync from "./components/hooks/useAsync";
 import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
 
@@ -9,10 +10,8 @@ function App() {
   const [order, setOrder] = useState("createdAt");
   //item state의 초기값으로 빈배열을 넣어줌
   const [items, setItems] = useState([]);
-  //데이터가 나오는 순간 중복 클릭이 안되도록 하는 state
-  const [isLoading, setIsLoading] = useState(false);
-  //에러객체나 null값을 가짐
-  const [loadingError, setLoadingError] = useState(null);
+
+  const [isLoading, loadingError, getReviewsAsync] = useAsync(getReviews);
 
   const [offset, setOffset] = useState(0);
   const sortedItems = items.sort((a, b) => b[order] - a[order]);
@@ -32,18 +31,10 @@ function App() {
   //비동기 함수
   //setItems에
   const handleLoad = async (option) => {
-    let result;
+    let result = await getReviewsAsync(option);
+    if (!result) return;
     //네트워크 리퀘스트전에 true로 만듬
-    try {
-      setIsLoading(true);
-      setLoadingError(null);
-      result = await getReviews(option);
-    } catch (error) {
-      setLoadingError(error);
-      return;
-    } finally {
-      setIsLoading(false);
-    }
+
     const { reviews, paging } = result;
     //페이지 네이션에서는 데이터를 일부부만 받아와서 items 배열에 요소들을 추가해주어야함
     if (option.offset === 0) {
