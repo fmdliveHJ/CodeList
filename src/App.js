@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { getReviews } from "./api";
+import { getReviews, createReview, updateReview } from "./api";
 import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
 
-const LIMIT = 3;
+const LIMIT = 6;
 
 function App() {
   const [order, setOrder] = useState("createdAt");
@@ -62,8 +62,17 @@ function App() {
     handleLoad({ order, offset, limit: LIMIT });
   };
 
-  const handleSubmitSuccess = (review) => {
+  const handleCreateSuccess = (review) => {
     setItems((prev) => [review, ...prev]);
+  };
+
+  const handleUpdateSuccess = (review) => {
+    setItems((prev) => {
+      //수정할 아이템에 해당하는 index 찾음
+      const splitIdx = prev.findIndex((item) => item.id === review.id);
+      //prev 배열에서 같은 아이디 해당하는 리뷰를 찾아서 갈아 끼움
+      return [...prev.slice(0, splitIdx), review, ...prev.slice(splitIdx + 1)];
+    });
   };
 
   //useEffect 호출시 바로 콜백함수 실행하는 것이 아니라 예약해두었다가 렌더링이 끝나고 실행
@@ -77,8 +86,16 @@ function App() {
         <button onClick={handleNewestClick}>최신순</button>
         <button onClick={handleBestClick}>베스트순</button>
       </div>
-      <ReviewForm onSubmitSuccess={handleSubmitSuccess} />
-      <ReviewList items={sortedItems} onDelete={handleDelete} />
+      <ReviewForm
+        onSubmit={createReview}
+        onSubmitSuccess={handleCreateSuccess}
+      />
+      <ReviewList
+        items={sortedItems}
+        onDelete={handleDelete}
+        onUpdate={updateReview}
+        onUpdateSuccess={handleUpdateSuccess}
+      />
       {/* <button onClick={handleLoadClick}>불러오기</button> */}
       {hasNext && (
         <button disabled={isLoading} onClick={handleMore}>

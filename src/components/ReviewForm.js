@@ -11,7 +11,9 @@ const INITIAL_VALUES = {
 };
 const ReviewForm = ({
   initialValues = INITIAL_VALUES,
+  initialPreview,
   onSubmitSuccess,
+  onSubmit,
   onCancel,
 }) => {
   // const [title, setTitle] = useState("");
@@ -65,7 +67,7 @@ const ReviewForm = ({
     try {
       setSubmittingError(null);
       setIsSubmitting(true);
-      result = await createReview(formData);
+      result = await onSubmit(formData);
     } catch (error) {
       setSubmittingError(error);
       return;
@@ -86,6 +88,7 @@ const ReviewForm = ({
         name="imgFile"
         value={values.imgFile}
         onChange={handleChange}
+        initialPreview={initialPreview}
       />
       <input
         type="text"
@@ -107,6 +110,7 @@ const ReviewForm = ({
       <button type="submit" disabled={isSubmit}>
         확인{" "}
       </button>
+      {onCancel && <button onClick={onCancel}>취소</button>}
       {submitError?.message && <div>{submitError.message}</div>}
     </form>
   );

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import Rating from "./Rating";
+import ReviewForm from "./ReviewForm";
 import "./ReviewList.css";
 
 function formatDate(value) {
@@ -6,9 +8,13 @@ function formatDate(value) {
   return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
 }
 
-function ReviewListItem({ item, onDelete }) {
+function ReviewListItem({ item, onDelete, onEdit }) {
   const handleDeleteClick = () => {
     onDelete(item.id);
+  };
+
+  const handleEditClick = () => {
+    onEdit(item.id);
   };
 
   return (
@@ -19,20 +25,49 @@ function ReviewListItem({ item, onDelete }) {
         <Rating value={item.rating} />
         <p>{formatDate(item.createdAt)}</p>
         <p>{item.content}</p>
+        <button onClick={handleEditClick}>수정</button>
         <button onClick={handleDeleteClick}>삭제</button>
       </div>
     </div>
   );
 }
-//app.js에서 전달 받은 props sort함수를 사용해서 정렬된 순서가 items에 있음
-//onDelete는 handleDelete함수를 props로 전달 받음
-function ReviewList({ items, onDelete }) {
+
+function ReviewList({ items, onDelete, onUpdate, onUpdateSuccess }) {
+  const [editingId, setEditingId] = useState(null);
+
+  const handleCancel = () => setEditingId(null);
+
   return (
     <ul>
       {items.map((item) => {
+        if (item.id === editingId) {
+          const { id, imgUrl, title, rating, content } = item;
+          const initialValues = { title, rating, content, imgFile: null };
+          //reviewForm에서 확인 버튼 누르면 formData실행 수정할때 사용하는 onUpdate함수가 id를 받음
+          const handleSubmit = (formData) => onUpdate(id, formData);
+          const handleSubmitSuccess = (review) => {
+            onUpdateSuccess(review);
+            setEditingId(null);
+          };
+          return (
+            <li key={item.id}>
+              <ReviewForm
+                initialValues={initialValues}
+                initialPreview={imgUrl}
+                onCancel={handleCancel}
+                onSubmit={handleSubmit}
+                onSubmitSuccess={handleSubmitSuccess}
+              />
+            </li>
+          );
+        }
         return (
           <li key={item.id}>
-            <ReviewListItem item={item} onDelete={onDelete} />
+            <ReviewListItem
+              item={item}
+              onDelete={onDelete}
+              onEdit={setEditingId}
+            />
           </li>
         );
       })}

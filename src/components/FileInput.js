@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-function FileInput({ name, value, onChange }) {
-  const [preview, setPreview] = useState();
+function FileInput({ name, value, onChange, initialPreview }) {
+  const [preview, setPreview] = useState(initialPreview);
   const inputRef = useRef();
   /**
    * input의 file은 value값이 비제어 컴포넌트라서 적용안됨
@@ -32,10 +32,10 @@ function FileInput({ name, value, onChange }) {
     //사이드 이펙트 정리
     //사이드 이펙트 = objectUrl을 만들면서 웹 브라우저가할당한 메모리
     return () => {
-      setPreview();
+      setPreview(initialPreview);
       URL.revokeObjectURL(nextPreview);
     };
-  }, [value]);
+  }, [value, initialPreview]);
 
   return (
     <div>
