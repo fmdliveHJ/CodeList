@@ -1,8 +1,19 @@
 import React, { useState } from "react";
+import { createReview } from "../api";
 import FileInput from "./FileInput";
 import RatingInput from "./RatingInput";
 import "./ReviewForm.css";
-const ReviewForm = () => {
+const INITIAL_VALUES = {
+  title: "",
+  rating: 0,
+  content: "",
+  imgFile: null,
+};
+const ReviewForm = ({
+  initialValues = INITIAL_VALUES,
+  onSubmitSuccess,
+  onCancel,
+}) => {
   // const [title, setTitle] = useState("");
   // const [rating, setRating] = useState(0);
   // const [content, setContent] = useState("");
@@ -23,12 +34,12 @@ const ReviewForm = () => {
   //   setContent(e.target.value);
   // };
   //이벤트 객체에서 name값을 가져오는 것을 활용
-  const [values, setValues] = useState({
-    title: "",
-    rating: 0,
-    content: "",
-    imgFile: null,
-  });
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
+
+  const [values, setValues] = useState(initialValues);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingError, setSubmittingError] = useState(null);
   //name과 value를 파라미터로 받고 set함수를 호출함
   const handleChange = (name, value) => {
     setValues((prev) => ({
@@ -43,8 +54,27 @@ const ReviewForm = () => {
     handleChange(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("title", values.title);
+    formData.append("rating", values.rating);
+    formData.append("content", values.content);
+    formData.append("imgFile", values.imgFile);
+    let result;
+    try {
+      setSubmittingError(null);
+      setIsSubmitting(true);
+      result = await createReview(formData);
+    } catch (error) {
+      setSubmittingError(error);
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
+    const { review } = result;
+    setValues(INITIAL_VALUES);
+    onSubmitSuccess(review);
     console.log({
       values,
     });
@@ -74,7 +104,10 @@ const ReviewForm = () => {
         value={values.content}
         onChange={handleInputChange}
       ></textarea>
-      <button type="submit">확인 </button>
+      <button type="submit" disabled={isSubmit}>
+        확인{" "}
+      </button>
+      {submitError?.message && <div>{submitError.message}</div>}
     </form>
   );
 };

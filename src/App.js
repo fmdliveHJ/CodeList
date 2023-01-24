@@ -61,6 +61,11 @@ function App() {
   const handleMore = () => {
     handleLoad({ order, offset, limit: LIMIT });
   };
+
+  const handleSubmitSuccess = (review) => {
+    setItems((prev) => [review, ...prev]);
+  };
+
   //useEffect 호출시 바로 콜백함수 실행하는 것이 아니라 예약해두었다가 렌더링이 끝나고 실행
   useEffect(() => {
     handleLoad({ order, offset: 0, limit: LIMIT });
@@ -72,7 +77,7 @@ function App() {
         <button onClick={handleNewestClick}>최신순</button>
         <button onClick={handleBestClick}>베스트순</button>
       </div>
-      <ReviewForm />
+      <ReviewForm onSubmitSuccess={handleSubmitSuccess} />
       <ReviewList items={sortedItems} onDelete={handleDelete} />
       {/* <button onClick={handleLoadClick}>불러오기</button> */}
       {hasNext && (
