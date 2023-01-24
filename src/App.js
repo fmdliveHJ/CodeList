@@ -9,6 +9,7 @@ function App() {
   const [order, setOrder] = useState("createdAt");
   //item state의 초기값으로 빈배열을 넣어줌
   const [items, setItems] = useState([]);
+  //데이터가 나오는 순간 중복 클릭이 안되도록 하는 state
   const [isLoading, setIsLoading] = useState(false);
   //에러객체나 null값을 가짐
   const [loadingError, setLoadingError] = useState(null);
@@ -18,10 +19,11 @@ function App() {
 
   //api에서 목록에 더 있는지 아닌지 hasNext로 확인할수 있음
   const [hasNext, setHasNext] = useState(false);
+  //정렬 순서를 최신순
   const handleNewestClick = () => setOrder("createdAt");
-
+  //정렬 순서를 베스트 rating인 베스트 순
   const handleBestClick = () => setOrder("rating");
-
+  //
   const handleDelete = (id) => {
     const nextItems = items.filter((item) => item.id !== id);
     setItems(nextItems);
@@ -59,7 +61,7 @@ function App() {
   const handleMore = () => {
     handleLoad({ order, offset, limit: LIMIT });
   };
-
+  //useEffect 호출시 바로 콜백함수 실행하는 것이 아니라 예약해두었다가 렌더링이 끝나고 실행
   useEffect(() => {
     handleLoad({ order, offset: 0, limit: LIMIT });
   }, [order]);

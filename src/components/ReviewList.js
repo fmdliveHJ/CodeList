@@ -1,3 +1,4 @@
+import Rating from "./Rating";
 import "./ReviewList.css";
 
 function formatDate(value) {
@@ -15,7 +16,7 @@ function ReviewListItem({ item, onDelete }) {
       <img className="ReviewListItem-img" src={item.imgUrl} alt={item.title} />
       <div>
         <h1>{item.title}</h1>
-        <p>{item.rating}</p>
+        <Rating value={item.rating} />
         <p>{formatDate(item.createdAt)}</p>
         <p>{item.content}</p>
         <button onClick={handleDeleteClick}>삭제</button>
@@ -23,7 +24,8 @@ function ReviewListItem({ item, onDelete }) {
     </div>
   );
 }
-
+//app.js에서 전달 받은 props sort함수를 사용해서 정렬된 순서가 items에 있음
+//onDelete는 handleDelete함수를 props로 전달 받음
 function ReviewList({ items, onDelete }) {
   return (
     <ul>
