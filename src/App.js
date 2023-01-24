@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getReviews, createReview, updateReview } from "./api";
+import { getReviews, createReview, updateReview, deleteReview } from "./api";
 import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
 
@@ -24,9 +24,10 @@ function App() {
   //정렬 순서를 베스트 rating인 베스트 순
   const handleBestClick = () => setOrder("rating");
   //
-  const handleDelete = (id) => {
-    const nextItems = items.filter((item) => item.id !== id);
-    setItems(nextItems);
+  const handleDelete = async (id) => {
+    const result = await deleteReview(id);
+    if (!result) return;
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
   //비동기 함수
   //setItems에

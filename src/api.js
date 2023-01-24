@@ -38,6 +38,17 @@ export async function updateReview(id, formData) {
   return body;
 }
 
+export async function deleteReview(id) {
+  const response = await fetch(`${BASE_URL}/film-reviews/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("리뷰를 수정하는데 실패했습니다.");
+  }
+  const body = await response.json();
+  return body;
+}
+
 /**
  *
  * 리뷰생성하고 받은 리스폰스 데이터를 전체 리뷰 목록의 state인 items state에 추가해주면 별도로 리퀘스트 하지 않아도 추가됨
