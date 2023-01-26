@@ -10,7 +10,7 @@ function App() {
   const [order, setOrder] = useState("createdAt");
   //item state의 초기값으로 빈배열을 넣어줌
   const [items, setItems] = useState([]);
-
+  //커스텀 훅 useAsync에 getReviews데이터 불러옴
   const [isLoading, loadingError, getReviewsAsync] = useAsync(getReviews);
 
   const [offset, setOffset] = useState(0);
